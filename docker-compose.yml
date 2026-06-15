@@ -1,0 +1,57 @@
+services:
+  node_a:
+    build: ./application
+    container_name: linux_a
+    hostname: golikov_server
+    networks:
+      servernet:
+        ipv4_address: 192.168.11.10
+    cap_add:
+      - NET_ADMIN
+    entrypoint: ["/bin/sh", "/configs/entrypoint.sh"]
+    volumes:
+      - ./configs/nodeA/entrypoint.sh:/configs/entrypoint.sh
+    restart: always
+
+  node_b:
+    build: ./application
+    container_name: linux_b
+    hostname: golikov_gateway
+    networks:
+      servernet:
+        ipv4_address: 192.168.11.1
+      clientnet:
+        ipv4_address: 192.168.12.10
+    privileged: true
+    entrypoint: ["/bin/sh", "/configs/entrypoint.sh"]
+    volumes:
+      - ./configs/nodeB/entrypoint.sh:/configs/entrypoint.sh
+    restart: always
+
+  node_c:
+    build: ./application
+    container_name: linux_c
+    hostname: golikov_client
+    networks:
+      clientnet:
+        ipv4_address: 192.168.12.100
+    cap_add:
+      - NET_ADMIN
+    entrypoint: ["/bin/sh", "/configs/entrypoint.sh"]
+    volumes:
+      - ./configs/nodeC/entrypoint.sh:/configs/entrypoint.sh
+    restart: always
+
+networks:
+  servernet:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.11.0/24
+          gateway: 192.168.11.254
+  clientnet:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.12.0/24
+          gateway: 192.168.12.254
